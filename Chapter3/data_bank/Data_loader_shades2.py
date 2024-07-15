@@ -75,12 +75,13 @@ class Data_loader_shades2(Data_loader):
         self.images = arguments["images"]
         self.labels = arguments["labels"]
         self.difference = arguments["difference"]
+        self.epsilons = arguments["epsilons"]
         self.model_number = arguments["model"]
 
     def load_data(self):
         # Two squares one on the left one on the right, different shades
         # task is to say which side is lighter
-        data, label, diff = self._generate_set()
+        data, label, diff, epsilons = self._generate_set()
 
         return data, label, diff
 
@@ -95,6 +96,7 @@ Save: %s
 Images: %s 
 Labels: %s 
 Difference: %s 
+Epsilons: %s
 Model : %s
 
 """ % (
@@ -107,6 +109,7 @@ Model : %s
             self.images,
             self.labels,
             self.difference,
+            self.epsilons,
             self.model_number,
         )
 
@@ -128,6 +131,7 @@ Model : %s
         data = np.ones([n, a, a])
         label = np.zeros([n, 1])
         diff = np.zeros(n)
+        epsilon = np.zeros(n)
         model_number = self.model_number
 
         for i in range(n):
@@ -226,15 +230,20 @@ Model : %s
 
             if noise:
 
-                epsilon_noise = min(abs(shade1 - shade2), 1 - shade1, 1 - shade2)
+                epsilon_noise = min(
+                    abs(shade1 - shade2), 1 - shade1, 1 - shade2, shade1, shade2
+                )
+
+                epsilon[i] = epsilon_noise
+
                 data[i, :, :] += np.random.uniform(
                     -epsilon_noise / 4, epsilon_noise / 4, (a, a)
                 )
-                for j in range(a):
-                    for k in range(a):
-                        data[i, j, k] = max(
-                            min(data[i, j, k], 1), 0
-                        )  # THIS LINE IS TO ENSURE THE BACKROUND IS WHITE
+                # for j in range(a):
+                #     for k in range(a):
+                #         data[i, j, k] = max(
+                #             min(data[i, j, k], 1), 0
+                #         )  # THIS LINE IS TO ENSURE THE BACKROUND IS WHITE
 
         noiseless_data = np.expand_dims(noiseless_data, axis=3)
         data = np.expand_dims(data, axis=3)
@@ -242,16 +251,19 @@ Model : %s
         image_link = self.images
         label_link = self.labels
         diff_link = self.difference
+        epsilon_link = self.epsilons
 
         noiseless_image_link = image_link + "noiseless" + str(model_number) + ".npy"
         image_link = image_link + str(model_number) + ".npy"
         label_link = label_link + str(model_number) + ".npy"
         diff_link = diff_link + str(model_number) + ".npy"
+        epsilon_link = epsilon_link + str(model_number) + ".npy"
 
         if self.save == True:
             np.save(noiseless_image_link, noiseless_data)
             np.save(image_link, data)
             np.save(label_link, label)
             np.save(diff_link, diff)
+            np.save(epsilon_link, epsilon)
 
-        return data, label, diff
+        return data, label, diff, epsilon

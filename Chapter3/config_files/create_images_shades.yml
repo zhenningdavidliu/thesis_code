@@ -12,4 +12,5 @@ DATA:
         images: "data/shades_data/t0_images"
         labels: "data/shades_data/t0_labels"
         difference: "data/shades_data/t0_diff"
+        epsilons: "data/shades_data/t0_epsilons"
         model: 1
