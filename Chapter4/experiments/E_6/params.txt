@@ -1,0 +1,1 @@
+Namespace(input_dim=100, output_dim=80, k=1000, epsilon=0.1, n_iter=10000, experiment_number=6, seeds=[3, 4, 5])
