@@ -74,7 +74,7 @@ if __name__ == "__main__":
     parser.add_argument("--epsilon", type=float, default=1e-1)
     parser.add_argument("--n_iter", type=int, default=1000)
     parser.add_argument("--experiment_number", type=int, default=0)
-    parser.add_argument("--seeds", nargs="+", type=int, default=[3, 4, 5])
+    parser.add_argument("--seeds", nargs="+", type=int, default=[1, 4, 5])
     args = parser.parse_args()
 
     # Run
@@ -117,8 +117,11 @@ if __name__ == "__main__":
     filename = os.path.join(
         f"experiments/E_{args.experiment_number}", "shadow_main.npz"
     )
-    np.savez(filename, all_losses=all_losses, ps=ps)
     p_cutoff = args.input_dim * (args.output_dim - args.input_dim)
+    np.savez(filename, all_losses=all_losses, ps=ps, p_cutoff=p_cutoff)
+
+    # Create plot
+
     plt.axvline(p_cutoff, color="red", linestyle="--")
     plt.plot(ps, all_losses.mean(0))
     plt.fill_between(
